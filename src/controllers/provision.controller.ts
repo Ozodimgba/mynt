@@ -21,6 +21,7 @@ export class ProvisionController {
     };
 
     console.log(requestData.body);
+    console.log(requestData.headers);
     const params = {
       quicknode_id:
         '9469f6bfc411b1c23f0f3677bcd22b890a4a755273dc2c0ad38559f7e1eb2700',

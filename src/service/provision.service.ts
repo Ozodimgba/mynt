@@ -22,24 +22,29 @@ export class ProvisionService {
       } = params;
 
       // Insert the data object into the specified table
-      const { data: insertedData, error } = await supabase
-        .from(tableName)
-        .insert([
-          {
-            quicknode_id,
-            referers,
-            contract_addresses,
-            chain,
-            network,
-            plan,
-          },
-        ]);
+      const { error } = await supabase.from(tableName).insert([
+        {
+          quicknode_id,
+          referers,
+          contract_addresses,
+          chain,
+          network,
+          plan,
+        },
+      ]);
 
       if (error) {
-        throw new Error(`Error storing data: ${error.message}`);
+        return {
+          status: 'error',
+          message: error,
+        };
       }
 
-      return insertedData;
+      return {
+        status: 'success', // or "error"
+        'dashboard-url': 'http://auth.yoursite.com/access/jwt',
+        'access-url': 'http://api.yoursite.com/some-token-here',
+      };
     } catch (error) {
       throw new Error(`Error storing data: ${error.message}`);
     }
