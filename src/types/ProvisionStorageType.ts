@@ -1,5 +1,5 @@
 export interface UserProvision {
-  quicknode_id: string;
+  'quicknode-id': string;
   'endpoint-id': string;
   'wss-url': string;
   'http-url': string;

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserProvision } from 'src/types/ProvisionStorageType';
 import { supabase } from 'src/config/supabase.config';
+import { redisClient } from 'src/config/redis.config';
 
 @Injectable()
 export class ProvisionService {
@@ -12,14 +13,18 @@ export class ProvisionService {
     try {
       // Define the table name where you want to store data
       const tableName = 'quicknodeuser';
+
       const {
-        quicknode_id,
+        'quicknode-id': quicknode_id,
         referers,
         contract_addresses,
         chain,
         network,
         plan,
       } = params;
+
+      console.log(quicknode_id);
+      await redisClient.set(`${quicknode_id}`, 'expiry');
 
       // Insert the data object into the specified table
       const { error } = await supabase.from(tableName).insert([

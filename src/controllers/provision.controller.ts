@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Req } from '@nestjs/common';
+import { Controller, Get, Post, Req, Param, Body } from '@nestjs/common';
 import { ProvisionService } from 'src/service/provision.service';
+// import { redisClient } from 'src/config/redis.config';
 import { Request } from 'express';
 
 @Controller('/provisioning')
@@ -11,31 +12,21 @@ export class ProvisionController {
     return this.provision.healthcheck();
   }
 
-  @Post('/auth')
-  auth(@Req() req: Request): Promise<any> {
-    const requestData = {
-      method: req.method,
-      url: req.url,
-      headers: req.headers,
-      body: req.body,
-    };
+  @Get(':userId')
+  getUserById(@Param('userId') userId: string) {
+    return `User with ID ${userId}`;
+  }
 
-    console.log(requestData.body);
-    console.log(requestData.headers);
-    const params = {
-      quicknode_id:
-        '9469f6bfc411b1c23f0f3677bcd22b890a4a755273dc2c0ad38559f7e1eb2700',
-      'endpoint-id': '2c03e048-5778-4944-b804-0de77df9363a',
-      'wss-url':
-        'wss://long-late-firefly.quiknode.pro/2f568e4df78544629ce9af64bbe3cef9145895f5/',
-      'http-url':
-        'https://long-late-firefly.quiknode.pro/2f568e4df78544629ce9af64bbe3cef9145895f5/',
-      referers: ['quicknode.com'], // may be null as well if none set
-      contract_addresses: [],
-      chain: 'ethereum',
-      network: 'mainnet',
-      plan: 'your-plan-slug',
-    };
+  @Post('/auth')
+  auth(@Req() req: Request, @Body() params: any): Promise<any> {
+    // const requestData = {
+    //   method: req.method,
+    //   url: req.url,
+    //   headers: req.headers,
+    //   body: req.body,
+    // };
+    // const params = req.body;
+    console.log(params);
     return this.provision.storeCredentials(params);
   }
 
