@@ -1,4 +1,4 @@
-#Mynt Solana NFT Marketplace Add-On
+# Mynt Solana NFT Marketplace Add-On
 Test the scripts: [Ozodimgba - cNFT-scripts](https://github.com/Ozodimgba/cNFT-scripts/tree/main)
 
 
