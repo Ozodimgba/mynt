@@ -1,7 +1,4 @@
-Certainly! Here's the markdown code for your Mynt Solana NFT marketplace add-on API endpoints formatted properly:
-
-```markdown
-# Mynt Solana NFT Marketplace Add-On
+Mynt Solana NFT Marketplace Add-On
 
 ## Endpoints
 
@@ -94,7 +91,5 @@ var raw = JSON.stringify({
 **Parameters:**
 
 ### VerifyCollection
-```
 
-I've reformatted the markdown to make it easier to read and understand. If you have any further questions or need additional assistance, please let me know!
-```
+
