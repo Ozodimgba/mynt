@@ -9,13 +9,12 @@ export const redisClient = createClient({
   url: url,
 });
 
-export async function createRedis() {
+(async () => {
+  redisClient.on('error', function (err) {
+    throw err;
+  });
+
   await redisClient.connect();
 
-  //   await redisClient.set('client', 'value');
-  //   const value = await redisClient.get('client');
-  //   console.log(value);
-  //   return value;
-}
-
-createRedis();
+  await redisClient.set('foo', 'bar');
+})();

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserProvision } from 'src/types/ProvisionStorageType';
 import { supabase } from 'src/config/supabase.config';
 import { redisClient } from 'src/config/redis.config';
@@ -23,7 +23,6 @@ export class ProvisionService {
         plan,
       } = params;
 
-      console.log(quicknode_id);
       await redisClient.set(`${quicknode_id}`, 'expiry');
 
       // Insert the data object into the specified table
@@ -39,19 +38,39 @@ export class ProvisionService {
       ]);
 
       if (error) {
-        return {
-          status: 'error',
-          message: error,
-        };
+        if (
+          error.message.includes(
+            'duplicate key value violates unique constraint',
+          )
+        ) {
+          throw new HttpException(
+            {
+              status: 'error',
+              message:
+                'Duplicate entry. The provided quicknode ID already exists.',
+            },
+            HttpStatus.CONFLICT,
+          );
+        } else {
+          throw new HttpException(
+            {
+              status: 'error',
+              message: 'An error occurred while storing data.',
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
       }
 
-      return {
-        status: 'success', // or "error"
-        'dashboard-url': 'http://auth.yoursite.com/access/jwt',
-        'access-url': 'http://api.yoursite.com/some-token-here',
-      };
+      if (!error) {
+        return {
+          status: 'success', // or "error"
+          'dashboard-url': 'http://auth.yoursite.com/access/jwt',
+          'access-url': 'http://api.yoursite.com/some-token-here',
+        };
+      }
     } catch (error) {
-      throw new Error(`Error storing data: ${error.message}`);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

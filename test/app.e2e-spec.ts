@@ -19,6 +19,8 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect('Hello World!');
+      .expect(
+        'This is the server for Mynt a quicknode market-place add-on for minting solana compressed nfts!',
+      );
   });
 });
