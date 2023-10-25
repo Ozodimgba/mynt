@@ -73,4 +73,16 @@ export class ProvisionService {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  async updateCredentials(params: UserProvision): Promise<any> {
+    console.log(params);
+  }
+
+  async deactivateEndpoint(params: UserProvision): Promise<any> {
+    console.log(params);
+  }
+
+  async deprovision(params: UserProvision): Promise<any> {
+    console.log(params);
+  }
 }
