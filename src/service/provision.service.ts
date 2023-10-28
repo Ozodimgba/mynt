@@ -75,7 +75,29 @@ export class ProvisionService {
   }
 
   async updateCredentials(params: UserProvision): Promise<any> {
-    console.log(params);
+    const tableName = 'quicknodeuser';
+
+    const {
+      'quicknode-id': quicknode_id,
+      // referers,
+      // contract_addresses,
+      // chain,
+      // network,
+      // plan,
+    } = params;
+
+    const { data, error } = await supabase
+      .from(tableName)
+      .select('quicknode_id')
+      .eq('quicknode_id', quicknode_id);
+
+    if (error) {
+      console.error(error);
+    }
+
+    if (data.length > 0) {
+      console.log(data[0]?.quicknode_id);
+    }
   }
 
   async deactivateEndpoint(params: UserProvision): Promise<any> {

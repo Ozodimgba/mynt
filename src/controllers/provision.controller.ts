@@ -30,9 +30,16 @@ export class ProvisionController {
   @Post('/auth')
   async auth(@Req() req: Request, @Body() params: any): Promise<any> {
     try {
-      const ResProcessed = await this.provision.storeCredentials(params);
-      console.log(ResProcessed.status);
-      return ResProcessed;
+      return this.provision.storeCredentials(params);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post('/update')
+  async update(@Req() req: Request, @Body() params: any): Promise<any> {
+    try {
+      return this.provision.updateCredentials(params);
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
