@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { AppService } from './service/app.service';
 // import { create_tree } from './lib/createTree';
 // import { createNFTCollection } from './lib/createCollection';
 import { Request } from 'express';
+import * as jayson from 'jayson';
 
 @Controller()
 export class AppController {
@@ -11,6 +12,34 @@ export class AppController {
   @Get()
   getHello(): string {
     return this.appService.getHello();
+  }
+
+  @Post()
+  async handle(@Body() body: any) {
+    const server = new jayson.Server({
+      add: (args: any, callback: any) => {
+        const result = args[0] + args[1];
+        callback(null, result);
+      },
+      subtract: (args: any, callback: any) => {
+        const result = args[0] - args[1];
+        callback(null, result);
+      },
+      multiply: (args: any, callback: any) => {
+        const result = args[0] * args[1];
+        callback(null, result);
+      },
+      // Add more methods here as needed
+    });
+    return new Promise((resolve, reject) => {
+      server.call(body, (err: any, result: any) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
   }
 
   // @Post('/createTree')
