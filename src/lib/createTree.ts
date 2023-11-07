@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Keypair, clusterApiUrl } from '@solana/web3.js';
+import { Keypair, LAMPORTS_PER_SOL, clusterApiUrl } from '@solana/web3.js';
 
 // import custom helpers for demos
-import { loadOrGenerateKeypair } from './helpers';
+import { loadOrGenerateKeypair, numberFormatter } from './helpers';
 import { ValidDepthSizePair } from '@solana/spl-account-compression';
 
 // import custom helpers to mint compressed NFTs
@@ -17,7 +17,7 @@ import bs58 from 'bs58';
 // define some reusable balance values for tracking
 let initBalance: number, balance: number;
 
-export async function create_tree() {
+export async function create_tree(cluster: string) {
   try {
     // Define your base58 encoded public key
     const base58PublicKey = '4YJqg2HjqcTykEqiH9Bk6aFfJqM9VrtfqN9gY7edMTRVM';
@@ -32,7 +32,13 @@ export async function create_tree() {
     //////////////////////////////////////////////////////////////////////////////
 
     // load the env variables and store the cluster RPC url
-    const CLUSTER_URL = process.env.RPC_URL ?? clusterApiUrl('devnet');
+    let CLUSTER_URL;
+    if (cluster === 'mainnet-beta') {
+      CLUSTER_URL = clusterApiUrl('mainnet-beta');
+    } else {
+      // set the default cluster to devnet
+      CLUSTER_URL = clusterApiUrl('devnet');
+    }
 
     // create a new rpc connection, using the ReadApi wrapper
     const connection = new WrapperConnection(CLUSTER_URL, 'confirmed');
@@ -69,7 +75,12 @@ export async function create_tree() {
       canopyDepth,
     );
 
-    console.log(tree);
+    console.log(`===============================`);
+    console.log(
+      'Total cost:',
+      numberFormatter((initBalance - balance) / LAMPORTS_PER_SOL, true),
+      'SOL\n',
+    );
 
     return tree;
   } catch (error) {
@@ -78,6 +89,3 @@ export async function create_tree() {
     throw error;
   }
 }
-
-// Call the async function
-create_tree();

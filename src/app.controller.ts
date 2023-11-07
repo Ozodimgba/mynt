@@ -15,14 +15,18 @@ export class AppController {
   }
 
   @Post()
-  async handle(@Body() body: any) {
+  async handle(@Req() request: Request, @Body() body: any) {
     const server = new jayson.Server({
-      add: (args: any, callback: any) => {
-        const result = args[0] + args[1];
-        callback(null, result);
+      createTree: async (args: any, callback: any) => {
+        try {
+          const result = await this.appService.createTree(args[0]);
+          callback(null, result);
+        } catch (error) {
+          callback(error, null);
+        }
       },
-      subtract: (args: any, callback: any) => {
-        const result = args[0] - args[1];
+      add: async (args: any, callback: any) => {
+        const result = await this.appService.mintCNFT();
         callback(null, result);
       },
       multiply: (args: any, callback: any) => {
@@ -31,6 +35,7 @@ export class AppController {
       },
       // Add more methods here as needed
     });
+
     return new Promise((resolve, reject) => {
       server.call(body, (err: any, result: any) => {
         if (err) {

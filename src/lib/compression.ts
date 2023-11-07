@@ -49,8 +49,8 @@ export async function createTree(
   maxDepthSizePair: ValidDepthSizePair,
   canopyDepth: number = 0,
 ) {
-  console.log('Creating a new Merkle tree...');
-  console.log('treeAddress:', treeKeypair.publicKey.toBase58());
+  // console.log('Creating a new Merkle tree...');
+  // console.log('treeAddress:', treeKeypair.publicKey.toBase58());
 
   // derive the tree's authority (PDA), owned by Bubblegum
   const [treeAuthority, _bump] = PublicKey.findProgramAddressSync(
@@ -105,11 +105,11 @@ export async function createTree(
       },
     );
 
-    console.log('\nMerkle tree created successfully!');
-    console.log(explorerURL({ txSignature }));
+    // console.log('\nMerkle tree created successfully!');
+    // console.log(explorerURL({ txSignature }));
 
     // return useful info
-    return { treeAuthority, treeAddress: treeKeypair.publicKey };
+    return { treeAuthority, treeAddress: treeKeypair.publicKey, txSignature };
   } catch (err: any) {
     console.error('\nFailed to create merkle tree:', err);
 

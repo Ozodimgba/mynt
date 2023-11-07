@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { create_tree } from 'src/lib/createTree';
+import { mintOneCNFT } from 'src/lib/mintOneCNFT';
 
 @Injectable()
 export class AppService {
@@ -8,6 +10,21 @@ export class AppService {
 
   provision(): string {
     return 'This is a healthcheck for the provision api endpoints';
+  }
+
+  async createTree(cluster: string): Promise<any> {
+    const result = await create_tree(cluster);
+    return result;
+  }
+
+  async createCollection(cluster: string): Promise<any> {
+    const result = await create_tree(cluster);
+    return result;
+  }
+
+  async mintCNFT(): Promise<any> {
+    const result = await mintOneCNFT([]);
+    return result;
   }
 
   // check(): any {
