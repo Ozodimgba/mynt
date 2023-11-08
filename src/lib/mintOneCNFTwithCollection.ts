@@ -40,7 +40,7 @@ import { ValidDepthSizePair } from '@solana/spl-account-compression';
 // define some reusable balance values for tracking
 let initBalance: number, balance: number;
 
-export async function mintOneCNFT(
+export async function mintOneWithCNFTCollection(
   creators: string[],
   cluster: Cluster,
   collectionName: string,
@@ -133,7 +133,7 @@ export async function mintOneCNFT(
     );
   } else {
     try {
-      treePubkey = new PublicKey(treeAuthority);
+      treePubkey = new PublicKey(treeAddress);
     } catch (error) {
       // Handle the error appropriately (e.g., log the error or throw a new error)
       console.error(
@@ -222,7 +222,7 @@ export async function mintOneCNFT(
     `Minting a single compressed NFT to ${payer.publicKey.toBase58()}...`,
   );
 
-  await mintCompressedNFT(
+  const mint = await mintCompressedNFT(
     connection,
     payer,
     treePubkey,
@@ -246,23 +246,25 @@ export async function mintOneCNFT(
     numberFormatter((initBalance - balance) / LAMPORTS_PER_SOL, true),
     'SOL\n',
   );
+
+  return mint;
 }
 
-const creators = [
-  'Ehg4iYiJv7uoC6nxnX58p4FoN5HPNoyqKhCMJ65eSePk',
-  '59RM2TCBLtkKqUzQa8FwesenJX4ZLM7BVVJtkTAy5v5X',
-];
+// const creators = [
+//   'Ehg4iYiJv7uoC6nxnX58p4FoN5HPNoyqKhCMJ65eSePk',
+//   '59RM2TCBLtkKqUzQa8FwesenJX4ZLM7BVVJtkTAy5v5X',
+// ];
 
-const treeAuthority = 'J12LTKYwfMmurbunJZQg8VLNgJjCpGK2HDU3mTXVSXGb';
-const collectionName = 'CNFT';
-const collectionSymbol = 'SNSS';
-const uri = 'https://supersweetcollection.notarealurl/collection.json';
+// const treeAuthority = 'J12LTKYwfMmurbunJZQg8VLNgJjCpGK2HDU3mTXVSXGb';
+// const collectionName = 'CNFT';
+// const collectionSymbol = 'SNSS';
+// const uri = 'https://supersweetcollection.notarealurl/collection.json';
 
-mintOneCNFT(
-  creators,
-  'devnet',
-  treeAuthority,
-  collectionName,
-  collectionSymbol,
-  uri,
-);
+// mintOneWithCNFT(
+//   creators,
+//   'devnet',
+//   treeAuthority,
+//   collectionName,
+//   collectionSymbol,
+//   uri,
+// );

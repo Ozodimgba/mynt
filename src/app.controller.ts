@@ -25,12 +25,50 @@ export class AppController {
           callback(error, null);
         }
       },
-      add: async (args: any, callback: any) => {
-        const result = await this.appService.mintCNFT();
+      mintWithoutCollection: async (args: any, callback: any) => {
+        const {
+          creators,
+          cluster,
+          name,
+          symbol,
+          uri,
+          receiverAddress,
+          owner,
+          treeAddress,
+        } = args;
+        const result = await this.appService.mintCNFT(
+          creators,
+          cluster,
+          name,
+          symbol,
+          uri,
+          receiverAddress,
+          owner,
+          treeAddress,
+        );
         callback(null, result);
       },
-      multiply: (args: any, callback: any) => {
-        const result = args[0] * args[1];
+      mintWithCollection: async (args: any, callback: any) => {
+        const {
+          creators,
+          cluster,
+          name,
+          symbol,
+          uri,
+          receiverAddress,
+          owner,
+          treeAddress,
+        } = args;
+        const result = await this.appService.mintWithCollection(
+          creators,
+          cluster,
+          name,
+          symbol,
+          uri,
+          receiverAddress,
+          owner,
+          treeAddress,
+        );
         callback(null, result);
       },
       // Add more methods here as needed

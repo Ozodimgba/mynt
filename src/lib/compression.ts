@@ -291,6 +291,7 @@ export async function mintCompressedNFT(
   collectionMasterEditionAccount: PublicKey,
   compressedNFTMetadata: MetadataArgs,
   receiverAddress?: PublicKey,
+  owner?: PublicKey,
 ) {
   // derive the tree's authority (PDA), owned by Bubblegum
   const [treeAuthority, _bump] = PublicKey.findProgramAddressSync(
@@ -344,16 +345,16 @@ export async function mintCompressedNFT(
   mintIxs.push(
     createMintToCollectionV1Instruction(
       {
-        payer: payer.publicKey,
+        payer: owner || payer.publicKey,
 
         merkleTree: treeAddress,
         treeAuthority,
-        treeDelegate: payer.publicKey,
+        treeDelegate: owner || payer.publicKey,
 
         // set the receiver of the NFT
         leafOwner: receiverAddress || payer.publicKey,
         // set a delegated authority over this NFT
-        leafDelegate: payer.publicKey,
+        leafDelegate: owner || payer.publicKey,
 
         /*
               You can set any delegate address at mint, otherwise should 
@@ -364,7 +365,7 @@ export async function mintCompressedNFT(
             */
 
         // collection details
-        collectionAuthority: payer.publicKey,
+        collectionAuthority: owner || payer.publicKey,
         collectionAuthorityRecordPda: BUBBLEGUM_PROGRAM_ID,
         collectionMint: collectionMint,
         collectionMetadata: collectionMetadata,
@@ -466,7 +467,7 @@ export async function mintCompressedNFTNoCollection(
         treeDelegate: owner || payer.publicKey,
         payer: payer.publicKey,
         leafDelegate: owner || payer.publicKey,
-        leafOwner: owner || payer.publicKey,
+        leafOwner: receiverAddress || payer.publicKey,
         compressionProgram: SPL_ACCOUNT_COMPRESSION_PROGRAM_ID,
         logWrapper: SPL_NOOP_PROGRAM_ID,
       },
@@ -526,21 +527,29 @@ export async function mintNFTsToMultipleRecipients(
   masterEditionAccount: PublicKey,
   compressedNFTMetadata: MetadataArgs,
   recipients: PublicKey[],
-) {
-  for (const recipient of recipients) {
-    console.log(
-      `Minting a single compressed NFT to ${recipient.toBase58()}...`,
-    );
+  owner: PublicKey,
+): Promise<void> {
+  try {
+    for (const recipient of recipients) {
+      console.log(
+        `Minting a single compressed NFT to ${recipient.toBase58()}...`,
+      );
 
-    await mintCompressedNFT(
-      connection,
-      payer,
-      treePublicKey,
-      mint,
-      metadataAccount,
-      masterEditionAccount,
-      compressedNFTMetadata,
-      recipient, // Mint to the specific recipient
-    );
+      await mintCompressedNFT(
+        connection,
+        payer,
+        treePublicKey,
+        mint,
+        metadataAccount,
+        masterEditionAccount,
+        compressedNFTMetadata,
+        recipient, // Mint to the specific recipient
+        owner,
+      );
+    }
+  } catch (error) {
+    // Handle the error in an appropriate way, such as logging or throwing a new error
+    console.error('Error during minting process:', error);
+    // throw new Error('Failed to mint NFTs to multiple recipients'); // Uncomment this line to throw a new error
   }
 }
