@@ -23,7 +23,7 @@ export class AppService {
   }
 
   async mintCNFT(): Promise<any> {
-    const result = await mintOneCNFT([]);
+    const result = await mintOneCNFT([], 'devnet', '', '', '');
     return result;
   }
 

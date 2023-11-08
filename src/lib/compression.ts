@@ -25,6 +25,7 @@ import {
   computeCreatorHash,
   computeDataHash,
   createCreateTreeInstruction,
+  createMintV1Instruction,
   createMintToCollectionV1Instruction,
 } from '@metaplex-foundation/mpl-bubblegum';
 import {
@@ -125,11 +126,15 @@ export async function createTree(
  * with the `payer` as the authority
  * @param Payer - Keypair that pays
  * @param Metadata - Follows the Metaplex NFT standard
+ * @param owner - This optional will me the owner of the collection, defaults to payer
+ * @param size - This optional field will the size of the collection
  */
 export async function createCollection(
   connection: Connection,
   payer: Keypair,
   metadataV3: CreateMetadataAccountArgsV3,
+  owner?: PublicKey,
+  size?: number,
 ) {
   // create and initialize the SPL token mint
   console.log("Creating the collection's mint...");
@@ -137,9 +142,9 @@ export async function createCollection(
     connection,
     payer,
     // mint authority
-    payer.publicKey,
+    owner || payer.publicKey,
     // freeze authority
-    payer.publicKey,
+    owner || payer.publicKey,
     // decimals - use `0` for NFTs since they are non-fungible
     0,
   );
@@ -151,7 +156,7 @@ export async function createCollection(
     connection,
     payer,
     mint,
-    payer.publicKey,
+    owner || payer.publicKey,
     // undefined, undefined,
   );
   console.log('Token account:', tokenAccount.toBase58());
@@ -163,7 +168,7 @@ export async function createCollection(
     payer,
     mint,
     tokenAccount,
-    payer,
+    owner || payer,
     // mint exactly 1 token
     1,
     // no `multiSigners`
@@ -190,9 +195,9 @@ export async function createCollection(
     {
       metadata: metadataAccount,
       mint: mint,
-      mintAuthority: payer.publicKey,
+      mintAuthority: owner || payer.publicKey,
       payer: payer.publicKey,
-      updateAuthority: payer.publicKey,
+      updateAuthority: owner || payer.publicKey,
     },
     {
       createMetadataAccountArgsV3: metadataV3,
@@ -216,9 +221,9 @@ export async function createCollection(
     {
       edition: masterEditionAccount,
       mint: mint,
-      mintAuthority: payer.publicKey,
+      mintAuthority: owner || payer.publicKey,
       payer: payer.publicKey,
-      updateAuthority: payer.publicKey,
+      updateAuthority: owner || payer.publicKey,
       metadata: metadataAccount,
     },
     {
@@ -232,11 +237,11 @@ export async function createCollection(
   const collectionSizeIX = createSetCollectionSizeInstruction(
     {
       collectionMetadata: metadataAccount,
-      collectionAuthority: payer.publicKey,
+      collectionAuthority: owner || payer.publicKey,
       collectionMint: mint,
     },
     {
-      setCollectionSizeArgs: { size: 50 },
+      setCollectionSizeArgs: { size: size || 50 },
     },
   );
 
@@ -373,6 +378,100 @@ export async function mintCompressedNFT(
       },
       {
         metadataArgs,
+      },
+    ),
+  );
+
+  try {
+    // construct the transaction with our instructions, making the `payer` the `feePayer`
+    const tx = new Transaction().add(...mintIxs);
+    tx.feePayer = payer.publicKey;
+
+    // send the transaction to the cluster
+    const txSignature = await sendAndConfirmTransaction(
+      connection,
+      tx,
+      [payer],
+      {
+        commitment: 'confirmed',
+        skipPreflight: true,
+      },
+    );
+
+    console.log('\nSuccessfully minted the compressed NFT!');
+    console.log(explorerURL({ txSignature }));
+
+    return txSignature;
+  } catch (err) {
+    console.error('\nFailed to mint compressed NFT:', err);
+
+    // log a block explorer link for the failed transaction
+    await extractSignatureFromFailedTransaction(connection, err);
+
+    throw err;
+  }
+}
+
+export async function mintCompressedNFTNoCollection(
+  connection: Connection,
+  payer: Keypair,
+  treeAddress: PublicKey,
+  compressedNFTMetadata: MetadataArgs,
+  receiverAddress?: PublicKey,
+  owner?: PublicKey,
+) {
+  // derive the tree's authority (PDA), owned by Bubblegum
+  const [treeAuthority, _bump] = PublicKey.findProgramAddressSync(
+    [treeAddress.toBuffer()],
+    BUBBLEGUM_PROGRAM_ID,
+  );
+
+  // derive a PDA (owned by Bubblegum) to act as the signer of the compressed minting
+  const [bubblegumSigner, _bump2] = PublicKey.findProgramAddressSync(
+    // `collection_cpi` is a custom prefix required by the Bubblegum program
+    [Buffer.from('collection_cpi', 'utf8')],
+    BUBBLEGUM_PROGRAM_ID,
+  );
+
+  // create an array of instruction, to mint multiple compressed NFTs at once
+  const mintIxs: TransactionInstruction[] = [];
+
+  /**
+   * correctly format the metadata args for the nft to mint
+   * ---
+   * note: minting an nft into a collection (via `createMintToCollectionV1Instruction`)
+   * will auto verify the collection. But, the `collection.verified` value inside the
+   * `metadataArgs` must be set to `false` in order for the instruction to succeed
+   */
+
+  /**
+   * compute the data and creator hash for display in the console
+   *
+   * note: this is not required to do in order to mint new compressed nfts
+   * (since it is performed on chain via the Bubblegum program)
+   * this is only for demonstration
+   */
+
+  /*
+        Add a single mint to collection instruction 
+        ---
+        But you could all multiple in the same transaction, as long as your 
+        transaction is still within the byte size limits
+      */
+  mintIxs.push(
+    createMintV1Instruction(
+      {
+        merkleTree: treeAddress,
+        treeAuthority,
+        treeDelegate: owner || payer.publicKey,
+        payer: payer.publicKey,
+        leafDelegate: owner || payer.publicKey,
+        leafOwner: owner || payer.publicKey,
+        compressionProgram: SPL_ACCOUNT_COMPRESSION_PROGRAM_ID,
+        logWrapper: SPL_NOOP_PROGRAM_ID,
+      },
+      {
+        message: compressedNFTMetadata,
       },
     ),
   );

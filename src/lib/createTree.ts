@@ -75,7 +75,7 @@ export async function create_tree(cluster: string) {
       canopyDepth,
     );
 
-    console.log(`===============================`);
+    console.log(`=========================================`);
     console.log(
       'Total cost:',
       numberFormatter((initBalance - balance) / LAMPORTS_PER_SOL, true),

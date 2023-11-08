@@ -24,16 +24,13 @@ import {
   TokenProgramVersion,
   TokenStandard,
 } from '@metaplex-foundation/mpl-bubblegum';
+import { CreateMetadataAccountArgsV3 } from '@metaplex-foundation/mpl-token-metadata';
 
 // import custom helpers for demos
 import { numberFormatter } from './helpers';
 
 // import custom helpers to mint compressed NFTs
-import {
-  // createCollection,
-  createTree,
-  mintCompressedNFTNoCollection,
-} from './compression';
+import { createCollection, createTree, mintCompressedNFT } from './compression';
 
 // local import of the connection wrapper, to help with using the ReadApi
 import { WrapperConnection } from '../ReadApi/WrapperConnection';
@@ -46,11 +43,12 @@ let initBalance: number, balance: number;
 export async function mintOneCNFT(
   creators: string[],
   cluster: Cluster,
-  cNFTName: string,
-  cNFTSymbol: string,
+  collectionName: string,
+  collectionSymbol: string,
   uri: string,
   treeAddress?: string,
   receiverAddress?: string,
+  collectionSize?: number,
   owner?: string,
 ) {
   //////////////////////////////////////////////////////////////////////////////
@@ -104,8 +102,8 @@ export async function mintOneCNFT(
   // );
 
   /*
-    Define our tree size parameters
-  */
+      Define our tree size parameters
+    */
 
   let treePubkey: PublicKey;
   if (!treeAddress) {
@@ -117,8 +115,8 @@ export async function mintOneCNFT(
     const canopyDepth = maxDepthSizePair.maxDepth - 5;
 
     /*
-      Actually allocate the tree on chain
-    */
+        Actually allocate the tree on chain
+      */
 
     // define the address the tree will live at
     const treeKeypair = Keypair.generate();
@@ -135,7 +133,7 @@ export async function mintOneCNFT(
     );
   } else {
     try {
-      treePubkey = new PublicKey(treeAddress);
+      treePubkey = new PublicKey(treeAuthority);
     } catch (error) {
       // Handle the error appropriately (e.g., log the error or throw a new error)
       console.error(
@@ -146,11 +144,6 @@ export async function mintOneCNFT(
       // throw new Error('The provided tree authority is not a valid public key.'); // Uncomment this line to throw a new error
     }
   }
-
-  /*
-    Create the actual NFT collection (using the normal Metaplex method)
-    (nothing special about compression here)
-  */
 
   let receiverPubkey: PublicKey;
   if (receiverAddress) {
@@ -171,12 +164,41 @@ export async function mintOneCNFT(
   }
 
   /*
-    Mint a single compressed NFT
-  */
+      Create the actual NFT collection (using the normal Metaplex method)
+      (nothing special about compression here)
+    */
+
+  // define the metadata to be used for creating the NFT collection
+  const collectionMetadataV3: CreateMetadataAccountArgsV3 = {
+    data: {
+      name: collectionName || 'NFT Collection',
+      symbol: collectionSymbol || 'SSNC',
+      // specific json metadata for the collection
+      uri: uri || 'https://supersweetcollection.notarealurl/collection.json',
+      sellerFeeBasisPoints: 100,
+      creators: creator.map((creatorPublicKey) => ({
+        address: creatorPublicKey,
+        verified: false,
+        share: 100 / creator.length,
+      })),
+      collection: null,
+      uses: null,
+    },
+    isMutable: false,
+    collectionDetails: null,
+  };
+
+  const collection = await createCollection(
+    connection,
+    payer,
+    collectionMetadataV3,
+    ownerPubkey,
+    collectionSize,
+  );
 
   const compressedNFTMetadata: MetadataArgs = {
-    name: cNFTName || 'No Name',
-    symbol: cNFTSymbol || 'NEW',
+    name: 'NFT Name',
+    symbol: collectionMetadataV3.data.symbol,
     // specific json metadata for each NFT
     uri: uri || 'https://supersweetcollection.notarealurl/token.json',
     creators: creator.map((creatorPublicKey) => ({
@@ -200,13 +222,16 @@ export async function mintOneCNFT(
     `Minting a single compressed NFT to ${payer.publicKey.toBase58()}...`,
   );
 
-  await mintCompressedNFTNoCollection(
+  await mintCompressedNFT(
     connection,
     payer,
     treePubkey,
+    collection.mint,
+    collection.metadataAccount,
+    collection.masterEditionAccount,
     compressedNFTMetadata,
+    // mint to this specific wallet (in this case, the tree owner aka `payer`)
     receiverPubkey || payer.publicKey,
-    ownerPubkey,
   );
 
   //////////////////////////////////////////////////////////////////////////////
@@ -228,9 +253,16 @@ const creators = [
   '59RM2TCBLtkKqUzQa8FwesenJX4ZLM7BVVJtkTAy5v5X',
 ];
 
-const treeAddress = 'J12LTKYwfMmurbunJZQg8VLNgJjCpGK2HDU3mTXVSXGb';
-const cNFTName = 'CNFT';
-const cNFTSymbol = 'SNSS';
+const treeAuthority = 'J12LTKYwfMmurbunJZQg8VLNgJjCpGK2HDU3mTXVSXGb';
+const collectionName = 'CNFT';
+const collectionSymbol = 'SNSS';
 const uri = 'https://supersweetcollection.notarealurl/collection.json';
 
-mintOneCNFT(creators, 'devnet', treeAddress, cNFTName, cNFTSymbol, uri);
+mintOneCNFT(
+  creators,
+  'devnet',
+  treeAuthority,
+  collectionName,
+  collectionSymbol,
+  uri,
+);
