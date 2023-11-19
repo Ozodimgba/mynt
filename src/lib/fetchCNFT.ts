@@ -12,21 +12,16 @@ import { printConsoleSeparator, savePublicKeyToFile } from './helpers';
 // imports from other libraries
 import { PublicKey, clusterApiUrl } from '@solana/web3.js';
 
-export async function fetchByOwner(
-  ownerBase58: string,
-  treeAddressbs58?: string,
+export async function fetchByCNFT(
+  assetId: string,
 ): Promise<any> {
   // load the stored PublicKeys for ease of use
 
 //   const owner = new PublicKey(`${ownerBase58}`);
 //   
-  const owner = new PublicKey(ownerBase58)
-  console.log(owner)
+  const cnft = new PublicKey(assetId)
+  console.log(cnft)
 
-  let treeAddress
-  if(treeAddressbs58){
-    treeAddress = new PublicKey(treeAddressbs58)
-  }
   //////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
@@ -39,13 +34,11 @@ export async function fetchByOwner(
   );
 
   // get all the assets owned by the specific address
-   printConsoleSeparator(`Getting all assets by owner ${owner.toBase58()}...`);
+   printConsoleSeparator(`Getting all assets by owner ${cnft.toBase58()}...`);
 
 
   const result = await connection
-    .getAssetsByOwner({
-      ownerAddress: owner.toBase58(),
-    })
+    .getAsset(cnft)
     // .then((res: any) => {
     //   console.log('Total assets returned:', res.total);
 

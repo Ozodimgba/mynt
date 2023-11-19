@@ -151,13 +151,10 @@ export async function mintMultipleCNFTs(
 
   let recipient: PublicKey[];
 
-  if (recipient.length === 0) {
-    creator = [payer.publicKey];
-  } else {
-    recipient = recipients.map(
-      (recipientString) => new PublicKey(recipientString),
-    );
-  }
+  creator =
+    recipient.length === 0
+      ? [payer.publicKey]
+      : recipients.map((recipientString) => new PublicKey(recipientString));
 
   console.log(creator);
 
@@ -269,12 +266,12 @@ const collectionSymbol = 'SNSS';
 const uri = 'https://supersweetcollection.notarealurl/collection.json';
 const recipients = [''];
 
-mintMultipleCNFTs(
-  creators,
-  'devnet',
-  collectionName,
-  collectionSymbol,
-  uri,
-  recipients,
-  treeAuthority,
-);
+// mintMultipleCNFTs(
+//   creators,
+//   'devnet',
+//   collectionName,
+//   collectionSymbol,
+//   uri,
+//   recipients,
+//   treeAuthority,
+// );

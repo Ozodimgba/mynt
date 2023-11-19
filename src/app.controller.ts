@@ -71,6 +71,12 @@ export class AppController {
         );
         callback(null, result);
       },
+      fetchByOwner: async (args: any, callback: any) => {
+        const { treeAddress, owner } = args;
+        const result = await this.appService.fetchCNFTByOwner(owner, treeAddress);
+
+        callback(null, result);
+      },
       // Add more methods here as needed
     });
 

@@ -4,4 +4,10 @@ import { mintOneWithCNFTCollection } from './mintOneCNFTwithCollection';
 import { mintMultipleCNFTs } from './mintToMultipleReceipients';
 import { fetchByOwner } from './fetchByOwner';
 
-export { mintMultipleCNFTs, mintOneCNFT, mintOneWithCNFTCollection, fetchByOwner, create_tree };
+export {
+  mintMultipleCNFTs,
+  mintOneCNFT,
+  mintOneWithCNFTCollection,
+  fetchByOwner,
+  create_tree,
+};

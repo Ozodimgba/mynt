@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Cluster } from '@solana/web3.js';
-import { create_tree, mintOneCNFT, mintOneWithCNFTCollection, mintMultipleCNFTs } from 'src/lib';
+import {
+  create_tree,
+  mintOneCNFT,
+  mintOneWithCNFTCollection,
+  mintMultipleCNFTs,
+  fetchByOwner,
+} from 'src/lib';
 
 @Injectable()
 export class AppService {
@@ -95,8 +101,9 @@ export class AppService {
     return result;
   }
 
-  async fetchCNFT():Promise<any>{
-
+  async fetchCNFTByOwner(owner: string, treeAddress?: string): Promise<any> {
+    const result = await fetchByOwner(owner);
+    return result;
   }
 
   // check(): any {
