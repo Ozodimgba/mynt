@@ -137,115 +137,115 @@ export async function createCollection(
   size?: number,
 ) {
   // create and initialize the SPL token mint
-  console.log("Creating the collection's mint...");
-  const mint = await createMint(
-    connection,
-    payer,
-    // mint authority
-    owner || payer.publicKey,
-    // freeze authority
-    owner || payer.publicKey,
-    // decimals - use `0` for NFTs since they are non-fungible
-    0,
-  );
-  console.log('Mint address:', mint.toBase58());
-
-  // create the token account
-  console.log('Creating a token account...');
-  const tokenAccount = await createAccount(
-    connection,
-    payer,
-    mint,
-    owner || payer.publicKey,
-    // undefined, undefined,
-  );
-  console.log('Token account:', tokenAccount.toBase58());
-
-  // mint 1 token ()
-  console.log('Minting 1 token for the collection...');
-  const mintSig = await mintTo(
-    connection,
-    payer,
-    mint,
-    tokenAccount,
-    owner || payer,
-    // mint exactly 1 token
-    1,
-    // no `multiSigners`
-    [],
-    undefined,
-    TOKEN_PROGRAM_ID,
-  );
-  console.log(explorerURL({ txSignature: mintSig }));
-
-  // derive the PDA for the metadata account
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [metadataAccount, _bump] = PublicKey.findProgramAddressSync(
-    [
-      Buffer.from('metadata', 'utf8'),
-      TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-      mint.toBuffer(),
-    ],
-    TOKEN_METADATA_PROGRAM_ID,
-  );
-  console.log('Metadata account:', metadataAccount.toBase58());
-
-  // create an instruction to create the metadata account
-  const createMetadataIx = createCreateMetadataAccountV3Instruction(
-    {
-      metadata: metadataAccount,
-      mint: mint,
-      mintAuthority: owner || payer.publicKey,
-      payer: payer.publicKey,
-      updateAuthority: owner || payer.publicKey,
-    },
-    {
-      createMetadataAccountArgsV3: metadataV3,
-    },
-  );
-
-  // derive the PDA for the metadata account
-  const [masterEditionAccount, _bump2] = PublicKey.findProgramAddressSync(
-    [
-      Buffer.from('metadata', 'utf8'),
-      TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-      mint.toBuffer(),
-      Buffer.from('edition', 'utf8'),
-    ],
-    TOKEN_METADATA_PROGRAM_ID,
-  );
-  console.log('Master edition account:', masterEditionAccount.toBase58());
-
-  // create an instruction to create the metadata account
-  const createMasterEditionIx = createCreateMasterEditionV3Instruction(
-    {
-      edition: masterEditionAccount,
-      mint: mint,
-      mintAuthority: owner || payer.publicKey,
-      payer: payer.publicKey,
-      updateAuthority: owner || payer.publicKey,
-      metadata: metadataAccount,
-    },
-    {
-      createMasterEditionArgs: {
-        maxSupply: 0,
-      },
-    },
-  );
-
-  // create the collection size instruction
-  const collectionSizeIX = createSetCollectionSizeInstruction(
-    {
-      collectionMetadata: metadataAccount,
-      collectionAuthority: owner || payer.publicKey,
-      collectionMint: mint,
-    },
-    {
-      setCollectionSizeArgs: { size: size || 50 },
-    },
-  );
-
   try {
+    console.log("Creating the collection's mint...");
+    const mint = await createMint(
+      connection,
+      payer,
+      // mint authority
+      owner || payer.publicKey,
+      // freeze authority
+      owner || payer.publicKey,
+      // decimals - use `0` for NFTs since they are non-fungible
+      0,
+    );
+    console.log('Mint address:', mint.toBase58());
+
+    // create the token account
+    console.log('Creating a token account...');
+    const tokenAccount = await createAccount(
+      connection,
+      payer,
+      mint,
+      owner || payer.publicKey,
+      // undefined, undefined,
+    );
+    console.log('Token account:', tokenAccount.toBase58());
+
+    // mint 1 token ()
+    console.log('Minting 1 token for the collection...');
+    const mintSig = await mintTo(
+      connection,
+      payer,
+      mint,
+      tokenAccount,
+      owner,
+      // mint exactly 1 token
+      1,
+      // no `multiSigners`
+      [],
+      undefined,
+      TOKEN_PROGRAM_ID,
+    );
+    console.log(explorerURL({ txSignature: mintSig }));
+
+    // derive the PDA for the metadata account
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [metadataAccount, _bump] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from('metadata', 'utf8'),
+        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        mint.toBuffer(),
+      ],
+      TOKEN_METADATA_PROGRAM_ID,
+    );
+    console.log('Metadata account:', metadataAccount.toBase58());
+
+    // create an instruction to create the metadata account
+    const createMetadataIx = createCreateMetadataAccountV3Instruction(
+      {
+        metadata: metadataAccount,
+        mint: mint,
+        mintAuthority: owner || payer.publicKey,
+        payer: payer.publicKey,
+        updateAuthority: owner || payer.publicKey,
+      },
+      {
+        createMetadataAccountArgsV3: metadataV3,
+      },
+    );
+
+    // derive the PDA for the metadata account
+    const [masterEditionAccount, _bump2] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from('metadata', 'utf8'),
+        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        mint.toBuffer(),
+        Buffer.from('edition', 'utf8'),
+      ],
+      TOKEN_METADATA_PROGRAM_ID,
+    );
+    console.log('Master edition account:', masterEditionAccount.toBase58());
+
+    // create an instruction to create the metadata account
+    const createMasterEditionIx = createCreateMasterEditionV3Instruction(
+      {
+        edition: masterEditionAccount,
+        mint: mint,
+        mintAuthority: owner || payer.publicKey,
+        payer: payer.publicKey,
+        updateAuthority: owner || payer.publicKey,
+        metadata: metadataAccount,
+      },
+      {
+        createMasterEditionArgs: {
+          maxSupply: 0,
+        },
+      },
+    );
+
+    // create the collection size instruction
+    const collectionSizeIX = createSetCollectionSizeInstruction(
+      {
+        collectionMetadata: metadataAccount,
+        collectionAuthority: owner || payer.publicKey,
+        collectionMint: mint,
+      },
+      {
+        setCollectionSizeArgs: { size: size || 50 },
+      },
+    );
+
     // construct the transaction with our instructions, making the `payer` the `feePayer`
     const tx = new Transaction()
       .add(createMetadataIx)
@@ -266,6 +266,9 @@ export async function createCollection(
 
     console.log('\nCollection successfully created!');
     console.log(explorerURL({ txSignature }));
+
+    // return all the accounts
+    return { mint, tokenAccount, metadataAccount, masterEditionAccount };
   } catch (err) {
     console.error('\nFailed to create collection:', err);
 
@@ -274,9 +277,6 @@ export async function createCollection(
 
     throw err;
   }
-
-  // return all the accounts
-  return { mint, tokenAccount, metadataAccount, masterEditionAccount };
 }
 
 /**

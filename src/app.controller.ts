@@ -57,8 +57,10 @@ export class AppController {
           uri,
           receiverAddress,
           owner,
+          collectionSize,
           treeAddress,
         } = args;
+
         const result = await this.appService.mintWithCollection(
           creators,
           cluster,
@@ -67,13 +69,17 @@ export class AppController {
           uri,
           receiverAddress,
           owner,
+          collectionSize,
           treeAddress,
         );
         callback(null, result);
       },
       fetchByOwner: async (args: any, callback: any) => {
         const { treeAddress, owner } = args;
-        const result = await this.appService.fetchCNFTByOwner(owner, treeAddress);
+        const result = await this.appService.fetchCNFTByOwner(
+          owner,
+          treeAddress,
+        );
 
         callback(null, result);
       },
@@ -97,11 +103,40 @@ export class AppController {
   //   return tree;
   // }
 
-  // @Post('/createCollection')
-  // async createCollection(): Promise<any> {
-  //   const collection = await createNFTCollection(); // Call create_tree function here
-  //   return collection;
-  // }
+  @Post('/mintWithCollection')
+  async createCollection(@Body() collectionData: any): Promise<any> {
+    const {
+      creators,
+      cluster,
+      name,
+      symbol,
+      uri,
+      receiverAddress,
+      owner,
+      collectionSize,
+      treeAddress,
+    } = collectionData;
+
+    try {
+      const result = await this.appService.mintWithCollection(
+        creators,
+        cluster,
+        name,
+        symbol,
+        uri,
+        receiverAddress,
+        owner,
+        collectionSize,
+        treeAddress,
+      );
+
+      // You might want to return a more structured response if needed
+      return { success: true, result };
+    } catch (error) {
+      // Handle errors appropriately
+      return { success: false, error: error.message };
+    }
+  }
 
   @Post('/creatCollection')
   test(@Req() req: Request): any {

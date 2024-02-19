@@ -11,7 +11,7 @@ import {
 @Injectable()
 export class AppService {
   getHello(): string {
-    return 'This is the server for Mynt a quicknode market-place add-on for minting solana compressed nfts!';
+    return 'This is the server for Mynt a tool for minting solana compressed nfts!';
   }
 
   provision(): string {
@@ -102,7 +102,7 @@ export class AppService {
   }
 
   async fetchCNFTByOwner(owner: string, treeAddress?: string): Promise<any> {
-    const result = await fetchByOwner(owner);
+    const result = await fetchByOwner(owner, treeAddress);
     return result;
   }
 

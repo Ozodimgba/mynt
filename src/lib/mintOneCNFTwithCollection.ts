@@ -69,7 +69,7 @@ export async function mintOneWithCNFTCollection(
   // load the env variables and store the cluster RPC url
   let creator: PublicKey[];
 
-  if (creators.length === 0) {
+  if (creators.length == 0) {
     creator = [payer.publicKey];
   } else {
     creator = creators.map((creatorString) => new PublicKey(creatorString));
